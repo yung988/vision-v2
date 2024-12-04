@@ -17,28 +17,58 @@ export function Hero() {
     if (!isClient) return
 
     const ctx = gsap.context(() => {
-      // Úvodní animace textu - pouze při načtení
-      gsap.from('.hero-title span', {
-        y: 100,
-        opacity: 0,
-        duration: 1.2,
-        stagger: 0.2,
-        ease: "power3.out"
-      })
-
-      // Video fade in s průhledností
-      gsap.fromTo(videoRef.current, 
-        { opacity: 0 },
+      // Úvodní animace textu s efektem
+      const tl = gsap.timeline()
+      
+      // Pozadí se objeví první
+      tl.fromTo(videoRef.current,
+        { 
+          opacity: 0,
+          scale: 1.2
+        },
         {
-          opacity: 0.6,
+          opacity: 0.85,
+          scale: 1,
           duration: 2,
-          delay: 1
+          ease: "power2.out"
         }
       )
+      
+      // Pak text po písmenech
+      .from('.hero-title .char', {
+        y: 100,
+        opacity: 0,
+        rotateX: -90,
+        stagger: 0.02,
+        duration: 1,
+        ease: "power3.out"
+      }, "-=1")
 
-      // Nastavení scrollTrigger pro zmizení celé sekce před galerií
+      // Paralax efekt při scrollu
+      gsap.to(videoRef.current, {
+        scale: 1.1,
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1
+        }
+      })
+
+      // Efekt na textu při scrollu
+      gsap.to('.hero-title', {
+        y: '-25%',
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1
+        }
+      })
+
+      // Zmizení před galerií
       ScrollTrigger.create({
-        trigger: '.gallery-section', // Předpokládám, že galerie má tuto třídu
+        trigger: '.gallery-section',
         start: "top center",
         onEnter: () => {
           gsap.to(heroRef.current, {
@@ -63,41 +93,99 @@ export function Hero() {
           })
         }
       })
+
+      // Hover efekt na textu
+      const chars = document.querySelectorAll('.hero-title .char')
+      chars.forEach((char) => {
+        char.addEventListener('mouseenter', () => {
+          gsap.to(char, {
+            y: -20,
+            scale: 1.1,
+            duration: 0.3,
+            ease: "power2.out"
+          })
+        })
+        char.addEventListener('mouseleave', () => {
+          gsap.to(char, {
+            y: 0,
+            scale: 1,
+            duration: 0.3,
+            ease: "power2.in"
+          })
+        })
+      })
     }, heroRef)
 
     return () => ctx.revert()
   }, [])
 
+  // Funkce pro rozdělení textu na písmena
+  const splitText = (text: string) => {
+    return text.split('').map((char, i) => (
+      <span key={i} className="char inline-block hover:cursor-pointer">
+        {char}
+      </span>
+    ))
+  }
+
   return (
     <section ref={heroRef} className="fixed inset-0 z-10">
-      {/* Text, který je vždy viditelný */}
+      {/* Text */}
       <div className="relative z-20 h-screen flex items-center">
         <div className="container px-4">
-          <h1 className="hero-title text-[15vw] font-light leading-[0.8] text-white">
-            <span className="block">Create</span>
-            <span className="block">Beyond</span>
-            <span className="block">Limits</span>
+          <h1 className="hero-title text-[15vw] font-light leading-[0.8] text-white mix-blend-difference">
+            <div className="block">{splitText('Create')}</div>
+            <div className="block">{splitText('Beyond')}</div>
+            <div className="block">{splitText('Limits')}</div>
           </h1>
         </div>
       </div>
 
-      {/* Video pozadí s průhledností */}
-      <div className="absolute inset-0 z-30">
-        <div className="absolute inset-0 bg-black/30 z-10" />
+      {/* Scroll indikátor */}
+      <div className="absolute bottom-12 left-0 right-0 z-20">
+        <div className="flex flex-col items-center gap-4">
+          <span className="text-sm font-light tracking-widest opacity-50">
+            SCROLL FOR MORE
+          </span>
+          <div className="w-[1px] h-[30px] bg-white/30 animate-bounce" />
+        </div>
+      </div>
+
+      {/* Video pozadí */}
+      <div className="absolute inset-0 z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/30 z-20" />
         <video 
           ref={videoRef}
           autoPlay 
           muted 
           loop 
           playsInline
-          className="w-full h-full object-cover opacity-60 mix-blend-overlay"
+          className="w-full h-full object-cover"
         >
           <source src="/video/showreel.mp4" type="video/mp4" />
         </video>
       </div>
 
-      {/* Extra gradient pro lepší čitelnost */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30 z-40 pointer-events-none" />
+      {/* Světelné efekty */}
+      <div className="absolute inset-0 z-30 mix-blend-overlay opacity-30">
+        <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-blue-500/20 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-purple-500/20 to-transparent" />
+      </div>
+
+      {/* Noise efekt pomocí SVG */}
+      <div className="absolute inset-0 z-40 opacity-[0.12] mix-blend-overlay pointer-events-none">
+        <svg className="w-full h-full">
+          <filter id="noise">
+            <feTurbulence 
+              type="fractalNoise" 
+              baseFrequency="0.80" 
+              numOctaves="4" 
+              stitchTiles="stitch"
+            />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#noise)" />
+        </svg>
+      </div>
     </section>
   )
 } 
