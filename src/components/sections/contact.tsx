@@ -32,8 +32,8 @@ export function Contact() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="min-h-screen bg-black flex items-center justify-center">
-      <div className="contact-content text-center">
+    <section ref={sectionRef} className="min-h-screen bg-black flex items-center">
+      <div className="contact-content pl-[10vw]">
         <h2 className="text-[10vw] font-light mb-8">Let's create together</h2>
         <p className="text-xl font-light mb-12 opacity-70">
           Have a project in mind? We'd love to hear about it.

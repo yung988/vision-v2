@@ -57,11 +57,10 @@ export function Gallery() {
   return (
     <section 
       ref={sectionRef} 
-      className="relative min-h-screen bg-black"
-      style={{ marginTop: '100vh' }} // Odsazení od hero sekce
+      className="gallery-section relative mt-[200vh] pt-32"
     >
       {/* Titulek */}
-      <div className="gallery-title absolute top-10 left-1/2 -translate-x-1/2 text-[3vw] font-light">
+      <div className="gallery-title absolute top-10 left-[10vw] text-[3vw] font-light">
         Selected Works
       </div>
 

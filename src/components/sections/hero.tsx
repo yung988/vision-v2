@@ -1,17 +1,21 @@
 "use client"
 
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useEffect, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { isClient } from '@/lib/utils'
 
-if (isClient) {
-  gsap.registerPlugin(ScrollTrigger)
-}
+// Register GSAP plugins outside of any conditions
+gsap.registerPlugin(ScrollTrigger)
 
 export function Hero() {
   const heroRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  // Handle client-side detection
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useLayoutEffect(() => {
     if (!isClient) return
@@ -117,7 +121,7 @@ export function Hero() {
     }, heroRef)
 
     return () => ctx.revert()
-  }, [])
+  }, [isClient])
 
   // Funkce pro rozdělení textu na písmena
   const splitText = (text: string) => {
@@ -126,6 +130,24 @@ export function Hero() {
         {char}
       </span>
     ))
+  }
+
+  // Only render content when on client side
+  if (!isClient) {
+    return (
+      <section className="fixed inset-0 z-10">
+        {/* Initial loading state that matches server render */}
+        <div className="relative z-20 h-screen flex items-center">
+          <div className="container px-4">
+            <h1 className="hero-title text-[15vw] font-light leading-[0.8] text-white mix-blend-difference">
+              <div className="block">Create</div>
+              <div className="block">Beyond</div>
+              <div className="block">Limits</div>
+            </h1>
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
